@@ -8,7 +8,9 @@ import { z } from 'zod';
 const updatePostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters').optional(),
   content: z.string().min(1, 'Content is required').optional(),
+  language: z.string().min(1, 'Language is required').optional(),
   categoryId: z.string().min(1, 'Category is required').optional(),
+  subcategoryId: z.string().optional().nullable(),
   imageUrl: z.string().url('Invalid image URL').optional().nullable(),
 });
 
@@ -30,6 +32,12 @@ export async function GET(
           }
         },
         category: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        subcategory: {
           select: {
             id: true,
             name: true,
@@ -112,12 +120,31 @@ export async function PUT(
       }
     }
 
+    // Verify subcategory exists if provided
+    if (validatedData.subcategoryId) {
+      const subcategory = await prisma.subcategory.findUnique({
+        where: { 
+          id: validatedData.subcategoryId,
+          categoryId: validatedData.categoryId || existingPost.categoryId
+        }
+      });
+
+      if (!subcategory) {
+        return NextResponse.json(
+          { error: 'Subcategory not found', message: 'The selected subcategory does not exist or does not belong to the selected category' },
+          { status: 400 }
+        );
+      }
+    }
+
     const updatedPost = await prisma.post.update({
       where: { id },
       data: {
         ...(validatedData.title && { title: validatedData.title }),
         ...(validatedData.content && { content: validatedData.content }),
+        ...(validatedData.language && { language: validatedData.language }),
         ...(validatedData.categoryId && { categoryId: validatedData.categoryId }),
+        ...(validatedData.subcategoryId !== undefined && { subcategoryId: validatedData.subcategoryId }),
         ...(validatedData.imageUrl !== undefined && { imageUrl: validatedData.imageUrl }),
       },
       include: {
@@ -129,6 +156,12 @@ export async function PUT(
           }
         },
         category: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        subcategory: {
           select: {
             id: true,
             name: true,

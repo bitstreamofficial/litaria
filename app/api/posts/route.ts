@@ -16,7 +16,9 @@ import {
 const createPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   content: z.string().min(1, 'Content is required'),
+  language: z.string().min(1, 'Language is required'),
   categoryId: z.string().min(1, 'Category is required'),
+  subcategoryId: z.string().optional(),
   imageUrl: z.string().url('Invalid image URL').optional(),
 });
 
@@ -56,6 +58,12 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
             }
           },
           category: {
+            select: {
+              id: true,
+              name: true,
+            }
+          },
+          subcategory: {
             select: {
               id: true,
               name: true,
@@ -109,14 +117,32 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     throw new NotFoundError('The selected category does not exist');
   }
 
+  // Verify subcategory exists if provided
+  if (validatedData.subcategoryId) {
+    const subcategory = await handleDatabaseOperation(async () => {
+      return prisma.subcategory.findUnique({
+        where: { 
+          id: validatedData.subcategoryId,
+          categoryId: validatedData.categoryId // Ensure subcategory belongs to the selected category
+        }
+      });
+    });
+
+    if (!subcategory) {
+      throw new NotFoundError('The selected subcategory does not exist or does not belong to the selected category');
+    }
+  }
+
   const post = await handleDatabaseOperation(async () => {
     return prisma.post.create({
       data: {
         title: validatedData.title,
         content: validatedData.content,
+        language: validatedData.language,
         imageUrl: validatedData.imageUrl,
         authorId: session.user.id,
         categoryId: validatedData.categoryId,
+        subcategoryId: validatedData.subcategoryId,
       },
       include: {
         author: {
@@ -127,6 +153,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           }
         },
         category: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        subcategory: {
           select: {
             id: true,
             name: true,

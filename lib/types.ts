@@ -1,10 +1,12 @@
-import { User, Post, Category } from '@prisma/client'
+import { User, Post, Category, Subcategory } from '@prisma/client'
 
-export type { User, Post, Category }
+export type { User, Post, Category, Subcategory }
 
 export interface PostWithAuthorAndCategory extends Post {
   author: User
   category: Category
+  subcategory?: Subcategory
+  language: string
 }
 
 export interface PostWithAuthorAndCategorySelect extends Post {
@@ -17,9 +19,21 @@ export interface PostWithAuthorAndCategorySelect extends Post {
     id: string
     name: string
   }
+  subcategory?: {
+    id: string
+    name: string
+  }
+  language: string
 }
 
 export interface CategoryWithPostCount extends Category {
+  _count: {
+    posts: number
+  }
+  subcategories?: Subcategory[]
+}
+
+export interface SubcategoryWithPostCount extends Subcategory {
   _count: {
     posts: number
   }
@@ -37,14 +51,18 @@ export interface PostsResponse {
 export interface CreatePostRequest {
   title: string
   content: string
+  language: string
   categoryId: string
+  subcategoryId?: string
   imageUrl?: string
 }
 
 export interface UpdatePostRequest {
   title?: string
   content?: string
+  language?: string
   categoryId?: string
+  subcategoryId?: string
   imageUrl?: string
 }
 

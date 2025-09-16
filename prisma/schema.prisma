@@ -24,6 +24,7 @@ model Post {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   title      String
   content    String
+  language   String   @default("en") // "en" for English, "bn" for Bengali
   imageUrl   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -34,13 +35,33 @@ model Post {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @db.ObjectId
   
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
+  subcategoryId String?      @db.ObjectId
+  
   @@index([createdAt])
   @@index([categoryId])
+  @@index([subcategoryId])
+  @@index([language])
 }
 
 model Category {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  name  String @unique
-  posts Post[]
-  createdAt DateTime @default(now())
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  language     String        @default("en") // "en" for English, "bn" for Bengali
+  posts        Post[]
+  subcategories Subcategory[]
+  createdAt    DateTime      @default(now())
+  
+  @@unique([name, language])
+}
+
+model Subcategory {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String   @db.ObjectId
+  posts      Post[]
+  createdAt  DateTime @default(now())
+  
+  @@unique([name, categoryId])
 }

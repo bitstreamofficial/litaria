@@ -13,6 +13,7 @@ interface Category {
 }
 
 interface CategorySelectorProps {
+  language?: string;
   value?: string;
   onValueChange: (value: string) => void;
   required?: boolean;
@@ -20,6 +21,7 @@ interface CategorySelectorProps {
 }
 
 export function CategorySelector({ 
+  language,
   value, 
   onValueChange, 
   required = false, 
@@ -30,13 +32,18 @@ export function CategorySelector({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (language) {
+      fetchCategories();
+    } else {
+      setCategories([]);
+    }
+  }, [language]);
 
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/categories');
+      const url = language ? `/api/categories?language=${language}` : '/api/categories';
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
@@ -52,6 +59,19 @@ export function CategorySelector({
       setLoading(false);
     }
   };
+
+  if (!language) {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor="category">Category {required && '*'}</Label>
+        <Select disabled>
+          <SelectTrigger>
+            <SelectValue placeholder="Please select a language first" />
+          </SelectTrigger>
+        </Select>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

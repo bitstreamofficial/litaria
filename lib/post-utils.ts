@@ -52,7 +52,9 @@ export function calculateReadingTime(content: string): number {
 export function validatePostData(data: {
   title: string;
   content: string;
+  language: string;
   categoryId: string;
+  subcategoryId?: string;
 }): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   
@@ -64,6 +66,10 @@ export function validatePostData(data: {
   
   if (!data.content.trim()) {
     errors.push('Content is required');
+  }
+  
+  if (!data.language) {
+    errors.push('Language is required');
   }
   
   if (!data.categoryId) {

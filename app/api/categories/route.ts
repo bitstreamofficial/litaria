@@ -7,12 +7,19 @@ import { z } from 'zod';
 // Validation schema for category creation
 const createCategorySchema = z.object({
   name: z.string().min(1, 'Category name is required').max(50, 'Category name must be less than 50 characters'),
+  language: z.string().min(1, 'Language is required').optional().default('en'),
 });
 
 // GET /api/categories - Get all categories with post counts
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const language = searchParams.get('language') || 'en';
+
     const categories = await prisma.category.findMany({
+      where: {
+        language: language
+      } as any,
       include: {
         _count: {
           select: { posts: true }
@@ -37,7 +44,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized', message: 'You must be logged in to create categories' },
@@ -48,14 +55,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createCategorySchema.parse(body);
 
-    // Check if category already exists
+    // Check if category already exists for this language
     const existingCategory = await prisma.category.findUnique({
-      where: { name: validatedData.name }
+      where: {
+        name_language: {
+          name: validatedData.name,
+          language: validatedData.language
+        }
+      } as any
     });
 
     if (existingCategory) {
       return NextResponse.json(
-        { error: 'Category exists', message: 'A category with this name already exists' },
+        { error: 'Category exists', message: 'A category with this name already exists for this language' },
         { status: 409 }
       );
     }
@@ -63,7 +75,8 @@ export async function POST(request: NextRequest) {
     const category = await prisma.category.create({
       data: {
         name: validatedData.name,
-      },
+        language: validatedData.language,
+      } as any,
       include: {
         _count: {
           select: { posts: true }
