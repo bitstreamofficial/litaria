@@ -18,7 +18,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader user={session.user} />
+      {/* <DashboardHeader user={session.user} /> */}
       <div className="flex">
         {/* Sidebar - hidden on mobile, visible on desktop */}
         <div className="hidden lg:block">

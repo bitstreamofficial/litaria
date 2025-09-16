@@ -1,14 +1,18 @@
 import { prisma } from '@/lib/db';
 import { PostList } from '@/components/posts';
-import { CategoryNav } from '@/components/categories';
 import { Pagination } from '@/components/ui/pagination';
 
-async function getPosts(page: number = 1, limit: number = 10) {
+async function getPosts(language?: string, page: number = 1, limit: number = 10) {
   try {
     const skip = (page - 1) * limit;
+    
+    // If no language specified, show all posts (mixed)
+    // If language specified, filter by that language
+    const where = language ? { language } : {};
 
     const [posts, totalPosts] = await Promise.all([
       prisma.post.findMany({
+        where,
         include: {
           author: {
             select: {
@@ -22,6 +26,12 @@ async function getPosts(page: number = 1, limit: number = 10) {
               id: true,
               name: true,
             }
+          },
+          subcategory: {
+            select: {
+              id: true,
+              name: true,
+            }
           }
         },
         orderBy: {
@@ -30,7 +40,7 @@ async function getPosts(page: number = 1, limit: number = 10) {
         skip,
         take: limit,
       }),
-      prisma.post.count()
+      prisma.post.count({ where })
     ]);
 
     const totalPages = Math.ceil(totalPosts / limit);
@@ -62,38 +72,18 @@ async function getPosts(page: number = 1, limit: number = 10) {
   }
 }
 
-async function getAllCategories() {
-  try {
-    const categories = await prisma.category.findMany({
-      include: {
-        _count: {
-          select: { posts: true }
-        }
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    });
 
-    return categories;
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return [];
-  }
-}
 
 interface HomePageProps {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; lang?: string }>;
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || '1');
+  const language = params.lang; // undefined means show all posts (mixed)
   
-  const [{ posts, pagination }, categories] = await Promise.all([
-    getPosts(page),
-    getAllCategories()
-  ]);
+  const { posts, pagination } = await getPosts(language, page);
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -114,44 +104,37 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            <CategoryNav 
-              categories={categories}
-              className="sticky top-8"
+        <main>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-foreground mb-2">
+              {language === 'bn' ? 'সর্বশেষ পোস্ট' : 
+               language === 'en' ? 'Latest English Posts' : 
+               'Latest Posts'}
+            </h2>
+            <p className="text-muted-foreground">
+              {pagination.totalPosts > 0 
+                ? `Showing ${posts.length} of ${pagination.totalPosts} posts${language ? ` in ${language === 'bn' ? 'Bengali' : 'English'}` : ''}`
+                : `No posts available${language ? ` in ${language === 'bn' ? 'Bengali' : 'English'}` : ''}`
+              }
+            </p>
+          </div>
+
+          <PostList 
+            posts={posts}
+            showAuthor={true}
+            emptyMessage="No posts available. Be the first to create one!"
+            className="mb-12"
+          />
+
+          {pagination.totalPages > 1 && (
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              baseUrl={language ? `/?lang=${language}` : "/"}
+              className="mt-12"
             />
-          </aside>
-
-          {/* Posts */}
-          <main className="lg:col-span-3">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-foreground mb-2">Latest Posts</h2>
-              <p className="text-muted-foreground">
-                {pagination.totalPosts > 0 
-                  ? `Showing ${posts.length} of ${pagination.totalPosts} posts`
-                  : 'No posts available'
-                }
-              </p>
-            </div>
-
-            <PostList 
-              posts={posts}
-              showAuthor={true}
-              emptyMessage="No posts available. Be the first to create one!"
-              className="mb-12"
-            />
-
-            {pagination.totalPages > 1 && (
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                baseUrl="/"
-                className="mt-12"
-              />
-            )}
-          </main>
-        </div>
+          )}
+        </main>
       </div>
     </div>
   );

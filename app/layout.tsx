@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "@/components/providers/session-provider";
 import { Header, Footer } from "@/components/layout";
+import { LanguageAwareHeader } from "@/components/layout/language-aware-header";
 import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
@@ -31,7 +33,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <Providers>
-          <Header />
+          <Suspense fallback={<Header />}>
+            <LanguageAwareHeader />
+          </Suspense>
           <main className="flex-1">
             {children}
           </main>

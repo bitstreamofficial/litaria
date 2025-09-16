@@ -1,23 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { User, LogOut, PenTool, Menu, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { User, LogOut, PenTool, Menu, X, Globe } from 'lucide-react';
 import { HeaderCategories } from './header-categories';
 import { LanguageSwitcher } from './language-switcher';
 
-export function Header() {
+export function LanguageAwareHeader() {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en');
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  // Load language from localStorage on mount
+  // Load language from URL or localStorage on mount
   useEffect(() => {
+    const urlLanguage = searchParams.get('lang');
     const savedLanguage = localStorage.getItem('litaria-language') || 'en';
-    setCurrentLanguage(savedLanguage);
-  }, []);
+    const language = urlLanguage || savedLanguage;
+    setCurrentLanguage(language);
+  }, [searchParams]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -26,12 +31,12 @@ export function Header() {
   const handleLanguageChange = (language: string) => {
     setCurrentLanguage(language);
     localStorage.setItem('litaria-language', language);
-
+    
     // Navigate to home with language parameter
     const currentPath = window.location.pathname;
     if (currentPath === '/') {
       // For home page, add language parameter
-      window.location.href = `/?lang=${language}`;
+      router.push(`/?lang=${language}`);
     } else {
       // For other pages, reload to update categories
       window.location.reload();
@@ -56,11 +61,11 @@ export function Header() {
           {/* Desktop Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Language Switcher */}
-            <LanguageSwitcher
+            <LanguageSwitcher 
               currentLanguage={currentLanguage}
               onLanguageChange={handleLanguageChange}
             />
-
+            
             {session ? (
               <>
                 <Link href="/dashboard">
@@ -124,16 +129,16 @@ export function Header() {
               {/* Mobile Navigation Links */}
               {/* Language Switcher for Mobile */}
               <div className="px-3 py-2">
-                <LanguageSwitcher
+                <LanguageSwitcher 
                   currentLanguage={currentLanguage}
                   onLanguageChange={handleLanguageChange}
                 />
               </div>
-
+              
               {/* Mobile Auth Section */}
               {session ? (
                 <>
-                  <Link
+                  <Link 
                     href="/dashboard"
                     className="block px-3 py-2 text-gray-700 hover:text-[#004D4D] hover:bg-gray-50 rounded-md font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
