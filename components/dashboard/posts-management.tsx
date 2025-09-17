@@ -14,17 +14,25 @@ interface PostsManagementProps {
   userId: string;
 }
 
+type PostStatus = 'all' | 'published' | 'draft' | 'scheduled';
+
 export function PostsManagement({ userId }: PostsManagementProps) {
   const [posts, setPosts] = useState<PostWithAuthorAndCategorySelect[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<PostWithAuthorAndCategorySelect[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<PostWithAuthorAndCategorySelect | null>(null);
+  const [activeFilter, setActiveFilter] = useState<PostStatus>('all');
   const { toast } = useToast();
 
   useEffect(() => {
     fetchPosts();
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    filterPosts();
+  }, [posts, activeFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchPosts = async () => {
     try {
@@ -44,6 +52,62 @@ export function PostsManagement({ userId }: PostsManagementProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterPosts = () => {
+    if (activeFilter === 'all') {
+      setFilteredPosts(posts);
+    } else {
+      setFilteredPosts(posts.filter(post => post.status === activeFilter));
+    }
+  };
+
+  const getStatusCounts = () => {
+    const counts = {
+      all: posts.length,
+      published: posts.filter(p => p.status === 'published').length,
+      draft: posts.filter(p => p.status === 'draft').length,
+      scheduled: posts.filter(p => p.status === 'scheduled').length,
+    };
+    return counts;
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'published':
+        return 'default';
+      case 'draft':
+        return 'secondary';
+      case 'scheduled':
+        return 'outline';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'published':
+        return '🚀';
+      case 'draft':
+        return '💾';
+      case 'scheduled':
+        return '⏰';
+      default:
+        return '📄';
+    }
+  };
+
+  const formatScheduledDate = (scheduledDate: string | Date | null) => {
+    if (!scheduledDate) return '';
+    const date = new Date(scheduledDate);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const handleDeleteClick = (post: PostWithAuthorAndCategorySelect) => {
@@ -128,11 +192,41 @@ export function PostsManagement({ userId }: PostsManagementProps) {
     );
   }
 
+  const counts = getStatusCounts();
+
   return (
     <>
+      {/* Status Filter Tabs */}
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="-mb-px flex space-x-8">
+          {[
+            { key: 'all', label: 'All Posts', icon: '📄' },
+            { key: 'published', label: 'Published', icon: '🚀' },
+            { key: 'draft', label: 'Drafts', icon: '💾' },
+            { key: 'scheduled', label: 'Scheduled', icon: '⏰' },
+          ].map((filter) => (
+            <button
+              key={filter.key}
+              onClick={() => setActiveFilter(filter.key as PostStatus)}
+              className={`${
+                activeFilter === filter.key
+                  ? 'border-teal-500 text-teal-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors`}
+            >
+              <span>{filter.icon}</span>
+              <span>{filter.label}</span>
+              <Badge variant="secondary" className="ml-2">
+                {counts[filter.key as keyof typeof counts]}
+              </Badge>
+            </button>
+          ))}
+        </nav>
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <p className="text-gray-600">
-          {posts.length} {posts.length === 1 ? 'post' : 'posts'} found
+          {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'} found
         </p>
         <Link href="/dashboard/posts/new">
           <Button className="bg-teal-700 hover:bg-teal-800">
@@ -142,7 +236,7 @@ export function PostsManagement({ userId }: PostsManagementProps) {
       </div>
 
       <div className="space-y-4">
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <Card key={post.id} className="p-6">
             <div className="flex justify-between items-start">
               <div className="flex-1">
@@ -150,6 +244,10 @@ export function PostsManagement({ userId }: PostsManagementProps) {
                   <h3 className="text-xl font-semibold text-gray-900">
                     {post.title}
                   </h3>
+                  <Badge variant={getStatusBadgeVariant(post.status)} className="flex items-center space-x-1">
+                    <span>{getStatusIcon(post.status)}</span>
+                    <span className="capitalize">{post.status}</span>
+                  </Badge>
                   <Badge variant="secondary">
                     {post.category.name}
                   </Badge>
@@ -163,6 +261,11 @@ export function PostsManagement({ userId }: PostsManagementProps) {
                   <span>Created: {formatPostDate(post.createdAt)}</span>
                   {post.updatedAt !== post.createdAt && (
                     <span>Updated: {formatPostDate(post.updatedAt)}</span>
+                  )}
+                  {post.status === 'scheduled' && post.scheduledDate && (
+                    <span className="text-blue-600 font-medium">
+                      📅 Scheduled: {formatScheduledDate(post.scheduledDate)}
+                    </span>
                   )}
                 </div>
               </div>
@@ -179,16 +282,27 @@ export function PostsManagement({ userId }: PostsManagementProps) {
             </div>
 
             <div className="flex gap-3 mt-6 pt-4 border-t">
-              <Link href={`/post/${post.id}`}>
-                <Button variant="outline" size="sm">
-                  View
-                </Button>
-              </Link>
+              {post.status === 'published' && (
+                <Link href={`/post/${post.id}`}>
+                  <Button variant="outline" size="sm">
+                    View
+                  </Button>
+                </Link>
+              )}
               <Link href={`/dashboard/posts/${post.id}/edit`}>
                 <Button variant="outline" size="sm">
                   Edit
                 </Button>
               </Link>
+              {post.status === 'draft' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                >
+                  Publish
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

@@ -16,6 +16,8 @@ export interface Post {
   imageUrl: string | null
   videoUrl: string | null
   isLead: boolean
+  status: string
+  scheduledDate: Date | null
   createdAt: Date
   updatedAt: Date
   authorId: string
@@ -90,6 +92,8 @@ export interface CreatePostRequest {
   imageUrl?: string
   videoUrl?: string
   isLead?: boolean
+  status?: string
+  scheduledDate?: Date
 }
 
 export interface UpdatePostRequest {
@@ -101,6 +105,8 @@ export interface UpdatePostRequest {
   imageUrl?: string
   videoUrl?: string
   isLead?: boolean
+  status?: string
+  scheduledDate?: Date
 }
 
 export interface RegisterRequest {

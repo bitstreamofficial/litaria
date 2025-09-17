@@ -28,6 +28,8 @@ model Post {
   imageUrl   String?
   videoUrl   String?  // YouTube video URL for podcast posts
   isLead     Boolean  @default(false) // Mark post as lead post
+  status     String   @default("draft") // "draft", "published", "scheduled"
+  scheduledDate DateTime? // Date for scheduled posts
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   
@@ -45,6 +47,7 @@ model Post {
   @@index([subcategoryId])
   @@index([language])
   @@index([isLead])
+  @@index([status])
 }
 
 model Category {

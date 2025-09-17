@@ -36,6 +36,8 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
     imageUrl: post?.imageUrl || '',
     videoUrl: post?.videoUrl || '',
     isLead: post?.isLead || false,
+    status: post?.status || 'draft',
+    scheduledDate: post?.scheduledDate ? new Date(post.scheduledDate).toISOString().slice(0, 16) : '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -89,6 +91,22 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
       return;
     }
 
+    // Additional validation for scheduled posts
+    if (formData.status === 'scheduled') {
+      if (!formData.scheduledDate) {
+        setErrors(['Scheduled date is required for scheduled posts']);
+        return;
+      }
+      
+      const scheduledTime = new Date(formData.scheduledDate);
+      const now = new Date();
+      
+      if (scheduledTime <= now) {
+        setErrors(['Scheduled date must be in the future']);
+        return;
+      }
+    }
+
     setLoading(true);
     setErrors([]);
     setFieldErrors({});
@@ -111,6 +129,8 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
           imageUrl: formData.imageUrl || undefined,
           videoUrl: formData.videoUrl || undefined,
           isLead: formData.isLead,
+          status: formData.status,
+          scheduledDate: formData.scheduledDate ? new Date(formData.scheduledDate) : undefined,
         }),
       });
 
@@ -123,7 +143,11 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
 
       toast({
         title: 'Success',
-        description: `Post ${isEditing ? 'updated' : 'created'} successfully`,
+        description: `Post ${isEditing ? 'updated' : 'created'} successfully${
+          formData.status === 'published' ? ' and published' :
+          formData.status === 'scheduled' ? ' and scheduled' :
+          ' as draft'
+        }`,
       });
 
       if (onSuccess) {
@@ -297,16 +321,111 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
 
 
 
+            {/* Publishing Options */}
+            <div className="space-y-4 border-t pt-6">
+              <Label className="text-base font-semibold">Publishing Options</Label>
+              
+              {/* Status Selection */}
+              <div className="space-y-3">
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      id="draft"
+                      type="radio"
+                      name="status"
+                      value="draft"
+                      checked={formData.status === 'draft'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      className="h-4 w-4 text-primary border-input focus:ring-2 focus:ring-ring"
+                    />
+                    <Label htmlFor="draft" className="text-sm font-medium cursor-pointer">
+                      💾 Save as Draft
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground ml-7">
+                    Save your work without publishing. You can edit and publish later.
+                  </p>
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      id="published"
+                      type="radio"
+                      name="status"
+                      value="published"
+                      checked={formData.status === 'published'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      className="h-4 w-4 text-primary border-input focus:ring-2 focus:ring-ring"
+                    />
+                    <Label htmlFor="published" className="text-sm font-medium cursor-pointer">
+                      🚀 Publish Now
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground ml-7">
+                    Make your post immediately visible to readers.
+                  </p>
+                </div>
+
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      id="scheduled"
+                      type="radio"
+                      name="status"
+                      value="scheduled"
+                      checked={formData.status === 'scheduled'}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      className="h-4 w-4 text-primary border-input focus:ring-2 focus:ring-ring"
+                    />
+                    <Label htmlFor="scheduled" className="text-sm font-medium cursor-pointer">
+                      ⏰ Schedule for Later
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground ml-7">
+                    Set a future date and time for automatic publishing.
+                  </p>
+                </div>
+              </div>
+
+              {/* Scheduled Date Input - Only show when scheduled is selected */}
+              {formData.status === 'scheduled' && (
+                <div className="space-y-2 ml-7">
+                  <Label htmlFor="scheduledDate" className="text-sm font-medium">
+                    Publication Date & Time *
+                  </Label>
+                  <input
+                    id="scheduledDate"
+                    type="datetime-local"
+                    value={formData.scheduledDate}
+                    onChange={(e) => handleInputChange('scheduledDate', e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                    required={formData.status === 'scheduled'}
+                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Choose when you want this post to be automatically published.
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Submit buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-4 pt-6">
               <Button
                 type="submit"
                 disabled={loading}
+                className="bg-teal-700 hover:bg-teal-800"
               >
-                {loading
-                  ? (isEditing ? 'Updating...' : 'Creating...')
-                  : (isEditing ? 'Update Post' : 'Create Post')
-                }
+                {loading ? (
+                  isEditing ? 'Updating...' : 'Saving...'
+                ) : (
+                  <>
+                    {formData.status === 'draft' && (isEditing ? 'Update Draft' : 'Save Draft')}
+                    {formData.status === 'published' && (isEditing ? 'Update & Publish' : 'Publish Now')}
+                    {formData.status === 'scheduled' && (isEditing ? 'Update Schedule' : 'Schedule Post')}
+                  </>
+                )}
               </Button>
 
               <Button

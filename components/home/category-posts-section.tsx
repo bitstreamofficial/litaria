@@ -23,19 +23,19 @@ export function CategoryPostsSection({ category }: CategoryPostsSectionProps) {
   }
 
   return (
-    <section className="mb-12">
+    <section className="mb-8 sm:mb-12">
       {/* Category Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground mb-1">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
           {category.displayName || category.name}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-xs sm:text-sm">
           {category._count.posts} {category._count.posts === 1 ? 'post' : 'posts'} available
         </p>
       </div>
 
-      {/* Posts Grid - 4 posts in a row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Posts Grid - Responsive: 1 on mobile, 2 on tablet, 4 on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {category.posts.map((post) => (
           <PostCard
             key={post.id}

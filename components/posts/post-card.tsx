@@ -28,7 +28,7 @@ export function PostCard({
     const isPodcastPost = post.category.name.toLowerCase().includes('podcast') && post.videoUrl;
 
     return (
-        <Card className="h-full hover:shadow-lg transition-shadow duration-200">
+        <Card className="h-full hover:shadow-lg transition-shadow duration-200 overflow-hidden py-0">
             <Link href={`/post/${post.id}`} className="block">
                 {isPodcastPost && post.videoUrl ? (
                     <div className="w-full h-48 p-4">
@@ -38,7 +38,7 @@ export function PostCard({
                         />
                     </div>
                 ) : post.imageUrl ? (
-                    <div className="relative w-full h-48 overflow-hidden rounded-t-lg">
+                    <div className="relative w-full h-48 overflow-hidden">
                         <Image
                             src={post.imageUrl}
                             alt={post.title}
@@ -48,7 +48,7 @@ export function PostCard({
                     </div>
                 ) : null}
 
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-3 pt-6">
                     <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary" className="text-xs">
                             {post.category.name}
@@ -82,6 +82,7 @@ export function PostCard({
                     </div>
                 </CardContent>
             </Link>
+            <div className="pb-6"></div>
         </Card>
     );
 }

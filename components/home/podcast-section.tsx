@@ -27,13 +27,13 @@ export function PodcastSection({ category }: PodcastSectionProps) {
   const podcastPost = category.posts[0]; // Only show the most recent podcast
 
   return (
-    <section className="mb-12">
+    <section className="mb-8 sm:mb-12">
       {/* Category Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground mb-1">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">
           {category.displayName || category.name}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-xs sm:text-sm">
           Latest podcast episode
         </p>
       </div>
@@ -42,8 +42,8 @@ export function PodcastSection({ category }: PodcastSectionProps) {
       <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
           {/* Left Side - Content */}
-          <div className="p-12 flex flex-col justify-center">
-            <div className="space-y-6">
+          <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-center">
+            <div className="space-y-4 sm:space-y-6">
               {/* Category and Author */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">
@@ -54,7 +54,7 @@ export function PodcastSection({ category }: PodcastSectionProps) {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl lg:text-4xl font-bold text-foreground leading-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground leading-tight">
                 <Link 
                   href={`/post/${podcastPost.id}`}
                   className="hover:text-primary transition-colors"
@@ -64,15 +64,15 @@ export function PodcastSection({ category }: PodcastSectionProps) {
               </h1>
 
               {/* Excerpt */}
-              <p className="text-muted-foreground text-xl leading-relaxed line-clamp-4">
-                {podcastPost.content.length > 250 
-                  ? `${podcastPost.content.substring(0, 250)}...`
+              <p className="text-muted-foreground text-base sm:text-lg lg:text-xl leading-relaxed line-clamp-3 sm:line-clamp-4">
+                {podcastPost.content.length > 200 
+                  ? `${podcastPost.content.substring(0, 200)}...`
                   : podcastPost.content
                 }
               </p>
 
               {/* Date */}
-              <div className="text-base text-muted-foreground">
+              <div className="text-sm sm:text-base text-muted-foreground">
                 {new Date(podcastPost.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -84,7 +84,7 @@ export function PodcastSection({ category }: PodcastSectionProps) {
               <div className="pt-2">
                 <Link 
                   href={`/post/${podcastPost.id}`}
-                  className="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors text-lg"
+                  className="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors text-base sm:text-lg"
                 >
                   Listen Now →
                 </Link>
@@ -93,8 +93,8 @@ export function PodcastSection({ category }: PodcastSectionProps) {
           </div>
 
           {/* Right Side - Video */}
-          <div className="relative aspect-video lg:aspect-auto lg:h-full min-h-[450px] p-6 flex items-center justify-center">
-            <div className="w-full h-full max-h-[350px] rounded-lg overflow-hidden shadow-md">
+          <div className="relative aspect-video lg:aspect-auto lg:h-full min-h-[250px] sm:min-h-[350px] lg:min-h-[450px] p-4 sm:p-6 flex items-center justify-center">
+            <div className="w-full h-full max-h-[200px] sm:max-h-[300px] lg:max-h-[350px] rounded-lg overflow-hidden shadow-md">
               {podcastPost.videoUrl ? (
                 <YouTubeEmbed 
                   url={podcastPost.videoUrl} 

@@ -21,6 +21,8 @@ const createPostSchema = z.object({
   imageUrl: z.string().url('Invalid image URL').optional(),
   videoUrl: z.string().url('Invalid video URL').optional(),
   isLead: z.boolean().optional().default(false),
+  status: z.enum(['draft', 'published', 'scheduled']).optional().default('draft'),
+  scheduledDate: z.string().datetime().optional(),
 });
 
 // GET /api/posts - Get all posts with pagination and filtering
@@ -30,6 +32,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const limit = parseInt(searchParams.get('limit') || '10');
   const categoryId = searchParams.get('categoryId');
   const authorId = searchParams.get('authorId');
+  const status = searchParams.get('status');
 
   const skip = (page - 1) * limit;
 
@@ -37,12 +40,16 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
   const where: {
     categoryId?: string;
     authorId?: string;
+    status?: string;
   } = {};
   if (categoryId) {
     where.categoryId = categoryId;
   }
   if (authorId) {
     where.authorId = authorId;
+  }
+  if (status) {
+    where.status = status;
   }
 
   // Get posts with pagination
@@ -148,6 +155,20 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       });
     }
 
+    // Validate scheduled date if status is scheduled
+    if (validatedData.status === 'scheduled') {
+      if (!validatedData.scheduledDate) {
+        throw new Error('Scheduled date is required for scheduled posts');
+      }
+      
+      const scheduledTime = new Date(validatedData.scheduledDate);
+      const now = new Date();
+      
+      if (scheduledTime <= now) {
+        throw new Error('Scheduled date must be in the future');
+      }
+    }
+
     return prisma.post.create({
       data: {
         title: validatedData.title,
@@ -156,6 +177,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         imageUrl: validatedData.imageUrl,
         videoUrl: validatedData.videoUrl,
         isLead: validatedData.isLead,
+        status: validatedData.status,
+        scheduledDate: validatedData.scheduledDate ? new Date(validatedData.scheduledDate) : null,
         authorId: session.user.id,
         categoryId: validatedData.categoryId,
         subcategoryId: validatedData.subcategoryId,

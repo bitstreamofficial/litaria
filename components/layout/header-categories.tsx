@@ -67,7 +67,7 @@ export function HeaderCategories({ }: HeaderCategoriesProps) {
 
   if (loading) {
     return (
-      <div className="hidden md:flex items-center space-x-6">
+      <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6">
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="h-4 w-16 bg-gray-200 animate-pulse rounded"></div>
         ))}
@@ -76,7 +76,7 @@ export function HeaderCategories({ }: HeaderCategoriesProps) {
   }
 
   return (
-    <nav className="hidden md:flex items-center space-x-6">
+    <nav className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6">
       {categories.map((category) => (
         <div
           key={category.id}
@@ -86,7 +86,7 @@ export function HeaderCategories({ }: HeaderCategoriesProps) {
         >
           <Link
             href={`/category/${category.id}`}
-            className="flex items-center text-gray-700 hover:text-[#004D4D] transition-colors font-medium py-2"
+            className="flex items-center text-gray-700 hover:text-[#004D4D] transition-colors font-medium py-2 px-3 md:px-0 rounded md:rounded-none hover:bg-gray-50 md:hover:bg-transparent"
           >
             {category.name}
             {category.subcategories && category.subcategories.length > 0 && (
@@ -96,7 +96,7 @@ export function HeaderCategories({ }: HeaderCategoriesProps) {
 
           {/* Subcategory Dropdown */}
           {category.subcategories && category.subcategories.length > 0 && hoveredCategory === category.id && (
-            <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div className="md:absolute md:top-full md:left-0 md:mt-1 md:w-48 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow-lg z-50 ml-4 md:ml-0">
               <div className="py-2">
                 {category.subcategories.map((subcategory) => (
                   <Link

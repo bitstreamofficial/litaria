@@ -15,12 +15,12 @@ export function HeroSection({ leadPost }: HeroSectionProps) {
   if (!leadPost) {
     return (
       <section className="bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-8 sm:py-12 lg:py-16">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-foreground">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 text-foreground">
               Welcome to <span className="text-primary">Litaria</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
               Discover amazing stories, insights, and ideas from our community of writers. 
               Join the conversation and share your own thoughts with the world.
             </p>
@@ -37,11 +37,11 @@ export function HeroSection({ leadPost }: HeroSectionProps) {
 
   return (
     <section className="bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-center">
           {/* Left Side - Content */}
-          <div className="space-y-6">
-            <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-4">
               {/* Category Badge */}
               <div className="flex items-center space-x-3">
                 <Badge variant="default" className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -56,12 +56,12 @@ export function HeroSection({ leadPost }: HeroSectionProps) {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl md:text-5xl font-bold leading-tight text-foreground">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-foreground">
                 {leadPost.title}
               </h1>
 
               {/* Excerpt */}
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed">
                 {excerpt}
               </p>
 
@@ -78,11 +78,11 @@ export function HeroSection({ leadPost }: HeroSectionProps) {
               </div>
 
               {/* Read More Button */}
-              <div className="pt-4">
+              <div className="pt-2 sm:pt-4">
                 <Link href={`/post/${leadPost.id}`}>
                   <Button 
                     size="lg" 
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold w-full sm:w-auto"
                   >
                     {isPodcastPost ? 'Watch Episode' : 'Read Full Story'}
                     <ArrowRight className="h-5 w-5 ml-2" />

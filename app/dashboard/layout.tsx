@@ -17,14 +17,14 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* <DashboardHeader user={session.user} /> */}
-      <div className="flex">
+      <div className="flex w-full">
         {/* Sidebar - hidden on mobile, visible on desktop */}
         <div className="hidden lg:block">
           <DashboardSidebar />
         </div>
-        <main className="flex-1 p-4 lg:p-6">
+        <main className="flex-1 min-w-0 p-4 lg:p-6 lg:ml-56">
           <div className="max-w-7xl mx-auto">
             <ErrorBoundary>
               {children}
