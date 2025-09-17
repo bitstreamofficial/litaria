@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Calendar, User, Tag, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { YouTubeEmbed } from '@/components/posts/youtube-embed';
 import { PostWithAuthorAndCategory, PostWithAuthorAndCategorySelect } from '@/lib/types';
 import { formatPostDate, generateExcerpt } from '@/lib/post-utils';
 
@@ -30,6 +31,9 @@ export function HeroSection({ leadPost }: HeroSectionProps) {
   }
 
   const excerpt = generateExcerpt(leadPost.content, 200);
+  
+  // Check if this is a podcast post with video
+  const isPodcastPost = leadPost.category.name.toLowerCase().includes('podcast') && leadPost.videoUrl;
 
   return (
     <section className="bg-background">
@@ -80,7 +84,7 @@ export function HeroSection({ leadPost }: HeroSectionProps) {
                     size="lg" 
                     className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
                   >
-                    Read Full Story
+                    {isPodcastPost ? 'Watch Episode' : 'Read Full Story'}
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
                 </Link>
@@ -88,9 +92,16 @@ export function HeroSection({ leadPost }: HeroSectionProps) {
             </div>
           </div>
 
-          {/* Right Side - Image */}
+          {/* Right Side - Video or Image */}
           <div className="relative">
-            {leadPost.imageUrl ? (
+            {isPodcastPost && leadPost.videoUrl ? (
+              <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border">
+                <YouTubeEmbed 
+                  url={leadPost.videoUrl} 
+                  className="w-full h-full"
+                />
+              </div>
+            ) : leadPost.imageUrl ? (
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border">
                 <Image
                   src={leadPost.imageUrl}

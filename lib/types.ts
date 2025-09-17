@@ -1,12 +1,46 @@
-import { User, Post, Category, Subcategory } from '@prisma/client'
+// Base model types matching our Prisma schema
+export interface User {
+  id: string
+  name: string
+  email: string
+  password: string
+  createdAt: Date
+  updatedAt: Date
+}
 
-export type { User, Post, Category, Subcategory }
+export interface Post {
+  id: string
+  title: string
+  content: string
+  language: string
+  imageUrl: string | null
+  videoUrl: string | null
+  isLead: boolean
+  createdAt: Date
+  updatedAt: Date
+  authorId: string
+  categoryId: string
+  subcategoryId: string | null
+}
+
+export interface Category {
+  id: string
+  name: string
+  language: string
+  createdAt: Date
+}
+
+export interface Subcategory {
+  id: string
+  name: string
+  categoryId: string
+  createdAt: Date
+}
 
 export interface PostWithAuthorAndCategory extends Post {
   author: User
   category: Category
   subcategory?: Subcategory | null
-  language: string
 }
 
 export interface PostWithAuthorAndCategorySelect extends Post {
@@ -23,7 +57,6 @@ export interface PostWithAuthorAndCategorySelect extends Post {
     id: string
     name: string
   } | null
-  language: string
 }
 
 export interface CategoryWithPostCount extends Category {
@@ -55,6 +88,7 @@ export interface CreatePostRequest {
   categoryId: string
   subcategoryId?: string
   imageUrl?: string
+  videoUrl?: string
   isLead?: boolean
 }
 
@@ -65,6 +99,7 @@ export interface UpdatePostRequest {
   categoryId?: string
   subcategoryId?: string
   imageUrl?: string
+  videoUrl?: string
   isLead?: boolean
 }
 

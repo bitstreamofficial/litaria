@@ -26,6 +26,7 @@ model Post {
   content    String
   language   String   @default("en") // "en" for English, "bn" for Bengali
   imageUrl   String?
+  videoUrl   String?  // YouTube video URL for podcast posts
   isLead     Boolean  @default(false) // Mark post as lead post
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

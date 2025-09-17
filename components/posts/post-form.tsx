@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,12 +34,38 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
     categoryId: post?.categoryId || '',
     subcategoryId: post?.subcategory?.id || '',
     imageUrl: post?.imageUrl || '',
+    videoUrl: post?.videoUrl || '',
     isLead: post?.isLead || false,
   });
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [selectedCategoryName, setSelectedCategoryName] = useState('');
+
+  // Check if the selected category is a podcast category
+  const isPodcastCategory = selectedCategoryName.toLowerCase().includes('podcast');
+
+  // Fetch category name when categoryId changes
+  useEffect(() => {
+    const fetchCategoryName = async () => {
+      if (formData.categoryId) {
+        try {
+          const response = await fetch(`/api/categories/${formData.categoryId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setSelectedCategoryName(data.category?.name || '');
+          }
+        } catch (error) {
+          console.error('Error fetching category:', error);
+        }
+      } else {
+        setSelectedCategoryName('');
+      }
+    };
+
+    fetchCategoryName();
+  }, [formData.categoryId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +109,7 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
           categoryId: formData.categoryId,
           subcategoryId: formData.subcategoryId || undefined,
           imageUrl: formData.imageUrl || undefined,
+          videoUrl: formData.videoUrl || undefined,
           isLead: formData.isLead,
         }),
       });
@@ -215,6 +242,24 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
                 Optional: Upload a cover image for your post
               </p>
             </div>
+
+            {/* YouTube Video URL - Only for Podcast Categories */}
+            {isPodcastCategory && (
+              <div className="space-y-2">
+                <Label htmlFor="videoUrl">YouTube Video URL *</Label>
+                <Input
+                  id="videoUrl"
+                  type="url"
+                  value={formData.videoUrl}
+                  onChange={(e) => handleInputChange('videoUrl', e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  required={isPodcastCategory}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Required for podcast posts: Enter the YouTube video URL
+                </p>
+              </div>
+            )}
 
             {/* Content */}
             <div className="space-y-2">

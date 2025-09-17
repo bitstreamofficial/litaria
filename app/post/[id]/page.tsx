@@ -6,6 +6,7 @@ import { formatPostDate, calculateReadingTime, getRelatedPosts } from '@/lib/pos
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PostCard } from '@/components/posts';
+import { YouTubeEmbed } from '@/components/posts/youtube-embed';
 import { Clock, User, Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -148,8 +149,15 @@ export default async function PostPage({ params }: PostPageProps) {
           </CardHeader>
 
           <CardContent>
-            {/* Featured Image */}
-            {post.imageUrl && (
+            {/* Check if this is a podcast post with video */}
+            {post.category.name.toLowerCase().includes('podcast') && post.videoUrl ? (
+              <div className="w-full mb-8">
+                <YouTubeEmbed 
+                  url={post.videoUrl} 
+                  className="aspect-video rounded-lg overflow-hidden"
+                />
+              </div>
+            ) : post.imageUrl ? (
               <div className="relative w-full h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
                 <Image
                   src={post.imageUrl}
@@ -159,7 +167,7 @@ export default async function PostPage({ params }: PostPageProps) {
                   priority
                 />
               </div>
-            )}
+            ) : null}
 
             {/* Post Content */}
             <div className="prose prose-lg max-w-none">

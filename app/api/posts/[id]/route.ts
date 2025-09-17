@@ -12,6 +12,7 @@ const updatePostSchema = z.object({
   categoryId: z.string().min(1, 'Category is required').optional(),
   subcategoryId: z.string().optional().nullable(),
   imageUrl: z.string().url('Invalid image URL').optional().nullable(),
+  videoUrl: z.string().url('Invalid video URL').optional().nullable(),
   isLead: z.boolean().optional(),
 });
 
@@ -162,6 +163,7 @@ export async function PUT(
         ...(validatedData.categoryId && { categoryId: validatedData.categoryId }),
         ...(validatedData.subcategoryId !== undefined && { subcategoryId: validatedData.subcategoryId }),
         ...(validatedData.imageUrl !== undefined && { imageUrl: validatedData.imageUrl }),
+        ...(validatedData.videoUrl !== undefined && { videoUrl: validatedData.videoUrl }),
         ...(validatedData.isLead !== undefined && { isLead: validatedData.isLead }),
       },
       include: {

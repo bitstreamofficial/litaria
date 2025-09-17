@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { ZodError, z } from "zod";
+import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 // Standard API error response interface

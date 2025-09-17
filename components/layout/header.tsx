@@ -13,16 +13,21 @@ export function Header() {
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [currentDate, setCurrentDate] = useState('');
 
-  // Load language from localStorage on mount and set current date
+  // Load language from URL first, then localStorage on mount and set current date
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('litaria-language') || 'en';
-    setCurrentLanguage(savedLanguage);
+    // Check URL first for language parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlLanguage = urlParams.get('lang');
+    
+    // Priority: URL parameter > localStorage > default 'en'
+    const language = urlLanguage || localStorage.getItem('litaria-language') || 'en';
+    setCurrentLanguage(language);
 
     // Set current date based on language
     const now = new Date();
     let dateString = '';
     
-    if (savedLanguage === 'bn') {
+    if (language === 'bn') {
       // Bengali date format
       const options: Intl.DateTimeFormatOptions = { 
         weekday: 'long', 

@@ -19,6 +19,7 @@ const createPostSchema = z.object({
   categoryId: z.string().min(1, 'Category is required'),
   subcategoryId: z.string().optional(),
   imageUrl: z.string().url('Invalid image URL').optional(),
+  videoUrl: z.string().url('Invalid video URL').optional(),
   isLead: z.boolean().optional().default(false),
 });
 
@@ -153,6 +154,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         content: validatedData.content,
         language: validatedData.language,
         imageUrl: validatedData.imageUrl,
+        videoUrl: validatedData.videoUrl,
         isLead: validatedData.isLead,
         authorId: session.user.id,
         categoryId: validatedData.categoryId,

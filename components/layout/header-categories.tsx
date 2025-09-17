@@ -14,56 +14,56 @@ interface HeaderCategoriesProps {
   language?: string;
 }
 
-export function HeaderCategories({ language: propLanguage }: HeaderCategoriesProps) {
+export function HeaderCategories({ }: HeaderCategoriesProps) {
   const searchParams = useSearchParams();
   const urlLanguage = searchParams.get('lang');
   
-  // Use URL language if available, otherwise use prop language, default to 'en'
-  const language = urlLanguage || propLanguage || 'en';
+  // For landing page (no URL lang param), always use English regardless of localStorage
+  const language = urlLanguage || 'en';
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [loading, setLoading] = useState(true);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchCategories();
-  }, [language]);
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/categories?language=${language}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories');
+        }
 
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/categories?language=${language}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories');
-      }
-
-      const data = await response.json();
-      const categoriesWithSubcategories = await Promise.all(
-        data.categories.map(async (category: Category) => {
-          // Fetch subcategories for each category
-          const subResponse = await fetch(`/api/categories/${category.id}/subcategories`);
-          if (subResponse.ok) {
-            const subData = await subResponse.json();
+        const data = await response.json();
+        const categoriesWithSubcategories = await Promise.all(
+          data.categories.map(async (category: Category) => {
+            // Fetch subcategories for each category
+            const subResponse = await fetch(`/api/categories/${category.id}/subcategories`);
+            if (subResponse.ok) {
+              const subData = await subResponse.json();
+              return {
+                ...category,
+                subcategories: subData.subcategories || []
+              };
+            }
             return {
               ...category,
-              subcategories: subData.subcategories || []
+              subcategories: []
             };
-          }
-          return {
-            ...category,
-            subcategories: []
-          };
-        })
-      );
-      
-      setCategories(categoriesWithSubcategories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setCategories([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+          })
+        );
+        
+        setCategories(categoriesWithSubcategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [language]);
 
   if (loading) {
     return (
