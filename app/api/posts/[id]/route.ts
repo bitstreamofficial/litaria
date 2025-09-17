@@ -12,6 +12,7 @@ const updatePostSchema = z.object({
   categoryId: z.string().min(1, 'Category is required').optional(),
   subcategoryId: z.string().optional().nullable(),
   imageUrl: z.string().url('Invalid image URL').optional().nullable(),
+  isLead: z.boolean().optional(),
 });
 
 // GET /api/posts/[id] - Get a specific post
@@ -137,6 +138,21 @@ export async function PUT(
       }
     }
 
+    // If setting this post as lead, remove lead status from all other posts in the same language
+    if (validatedData.isLead === true) {
+      const postLanguage = validatedData.language || existingPost.language;
+      await prisma.post.updateMany({
+        where: {
+          language: postLanguage,
+          isLead: true,
+          id: { not: id } // Exclude the current post
+        },
+        data: {
+          isLead: false
+        }
+      });
+    }
+
     const updatedPost = await prisma.post.update({
       where: { id },
       data: {
@@ -146,6 +162,7 @@ export async function PUT(
         ...(validatedData.categoryId && { categoryId: validatedData.categoryId }),
         ...(validatedData.subcategoryId !== undefined && { subcategoryId: validatedData.subcategoryId }),
         ...(validatedData.imageUrl !== undefined && { imageUrl: validatedData.imageUrl }),
+        ...(validatedData.isLead !== undefined && { isLead: validatedData.isLead }),
       },
       include: {
         author: {

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import { PostList } from '@/components/posts';
 import { Pagination } from '@/components/ui/pagination';
+import { HeroSection } from '@/components/home/hero-section';
 
 async function getPosts(language?: string, page: number = 1, limit: number = 10) {
   try {
@@ -8,7 +9,10 @@ async function getPosts(language?: string, page: number = 1, limit: number = 10)
     
     // If no language specified, show all posts (mixed)
     // If language specified, filter by that language
-    const where = language ? { language } : {};
+    // Exclude lead posts from regular listing
+    const where = language 
+      ? { language, isLead: false } 
+      : { isLead: false };
 
     const [posts, totalPosts] = await Promise.all([
       prisma.post.findMany({
@@ -72,6 +76,47 @@ async function getPosts(language?: string, page: number = 1, limit: number = 10)
   }
 }
 
+async function getLeadPost(language?: string) {
+  try {
+    // Default to English for lead post when no language is specified
+    const leadPostLanguage = language || 'en';
+    const where = { isLead: true, language: leadPostLanguage };
+
+    const leadPost = await prisma.post.findFirst({
+      where,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          }
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        subcategory: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    });
+
+    return leadPost || undefined;
+  } catch (error) {
+    console.error('Error fetching lead post:', error);
+    return undefined;
+  }
+}
+
 
 
 interface HomePageProps {
@@ -83,24 +128,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const page = parseInt(params.page || '1');
   const language = params.lang; // undefined means show all posts (mixed)
   
-  const { posts, pagination } = await getPosts(language, page);
+  const [{ posts, pagination }, leadPost] = await Promise.all([
+    getPosts(language, page),
+    getLeadPost(language)
+  ]);
 
   return (
     <div className="min-h-screen bg-secondary">
-      {/* Hero Section */}
-      <section className="bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4">
-              Welcome to <span className="text-primary">Litaria</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Discover amazing stories, insights, and ideas from our community of writers. 
-              Join the conversation and share your own thoughts with the world.
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section with Lead Post */}
+      <HeroSection leadPost={leadPost} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

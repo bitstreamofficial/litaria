@@ -34,6 +34,7 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
     categoryId: post?.categoryId || '',
     subcategoryId: post?.subcategory?.id || '',
     imageUrl: post?.imageUrl || '',
+    isLead: post?.isLead || false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -82,6 +83,7 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
           categoryId: formData.categoryId,
           subcategoryId: formData.subcategoryId || undefined,
           imageUrl: formData.imageUrl || undefined,
+          isLead: formData.isLead,
         }),
       });
 
@@ -125,6 +127,10 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
     // Clear subcategory when category changes
     else if (field === 'categoryId') {
       setFormData(prev => ({ ...prev, categoryId: value, subcategoryId: '' }));
+    } 
+    // Handle boolean values for isLead
+    else if (field === 'isLead') {
+      setFormData(prev => ({ ...prev, [field]: value === 'true' }));
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
@@ -223,6 +229,25 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
                 className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-vertical bg-background text-foreground"
               />
               <FieldError error={fieldErrors.content} />
+            </div>
+
+            {/* Lead Post Option */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  id="isLead"
+                  type="checkbox"
+                  checked={formData.isLead}
+                  onChange={(e) => handleInputChange('isLead', e.target.checked.toString())}
+                  className="h-4 w-4 text-primary border-input rounded focus:ring-2 focus:ring-ring"
+                />
+                <Label htmlFor="isLead" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Set as Header Leading Post
+                </Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Mark this post as a featured header post. Only one post per language can be a leading post at a time.
+              </p>
             </div>
 
 

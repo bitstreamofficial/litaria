@@ -13,11 +13,9 @@ export async function checkDatabaseHealth(): Promise<DatabaseHealthStatus> {
   
   try {
     // Simple query to test database connection
-    await prisma.$queryRaw`SELECT 1`;
-    
-    const latency = Date.now() - startTime;
-    
-    return {
+    await prisma.user.findFirst();
+
+    const latency = Date.now() - startTime;    return {
       isHealthy: true,
       latency,
       timestamp: new Date().toISOString(),
@@ -56,7 +54,7 @@ export async function withDatabaseRetry<T>(
   maxRetries: number = 3,
   retryDelay: number = 1000
 ): Promise<T> {
-  let lastError: Error;
+  let lastError: Error = new Error('Database operation failed');
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {

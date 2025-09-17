@@ -4,7 +4,6 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 import { 
-  createErrorResponse, 
   withErrorHandler, 
   handleDatabaseOperation,
   AuthenticationError,
@@ -20,6 +19,7 @@ const createPostSchema = z.object({
   categoryId: z.string().min(1, 'Category is required'),
   subcategoryId: z.string().optional(),
   imageUrl: z.string().url('Invalid image URL').optional(),
+  isLead: z.boolean().optional().default(false),
 });
 
 // GET /api/posts - Get all posts with pagination and filtering
@@ -104,7 +104,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
 
   const body = await request.json();
-  const validatedData = validateRequest(createPostSchema, body);
+  const validatedData = validateRequest<z.infer<typeof createPostSchema>>(createPostSchema, body);
 
   // Verify category exists
   const category = await handleDatabaseOperation(async () => {
@@ -134,12 +134,26 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
 
   const post = await handleDatabaseOperation(async () => {
+    // If this post is marked as lead, first remove lead status from all other posts in the same language
+    if (validatedData.isLead) {
+      await prisma.post.updateMany({
+        where: {
+          language: validatedData.language,
+          isLead: true
+        },
+        data: {
+          isLead: false
+        }
+      });
+    }
+
     return prisma.post.create({
       data: {
         title: validatedData.title,
         content: validatedData.content,
         language: validatedData.language,
         imageUrl: validatedData.imageUrl,
+        isLead: validatedData.isLead,
         authorId: session.user.id,
         categoryId: validatedData.categoryId,
         subcategoryId: validatedData.subcategoryId,

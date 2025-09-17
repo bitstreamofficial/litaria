@@ -5,7 +5,7 @@ export type { User, Post, Category, Subcategory }
 export interface PostWithAuthorAndCategory extends Post {
   author: User
   category: Category
-  subcategory?: Subcategory
+  subcategory?: Subcategory | null
   language: string
 }
 
@@ -22,7 +22,7 @@ export interface PostWithAuthorAndCategorySelect extends Post {
   subcategory?: {
     id: string
     name: string
-  }
+  } | null
   language: string
 }
 
@@ -55,6 +55,7 @@ export interface CreatePostRequest {
   categoryId: string
   subcategoryId?: string
   imageUrl?: string
+  isLead?: boolean
 }
 
 export interface UpdatePostRequest {
@@ -64,6 +65,7 @@ export interface UpdatePostRequest {
   categoryId?: string
   subcategoryId?: string
   imageUrl?: string
+  isLead?: boolean
 }
 
 export interface RegisterRequest {

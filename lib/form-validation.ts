@@ -28,7 +28,7 @@ export function validateForm<T>(
       const fieldErrors: Record<string, string> = {};
       const errors: string[] = [];
 
-      error.errors.forEach((err) => {
+      error.issues.forEach((err) => {
         const path = err.path.join(".");
         const message = err.message;
         

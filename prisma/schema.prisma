@@ -26,6 +26,7 @@ model Post {
   content    String
   language   String   @default("en") // "en" for English, "bn" for Bengali
   imageUrl   String?
+  isLead     Boolean  @default(false) // Mark post as lead post
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   
@@ -42,6 +43,7 @@ model Post {
   @@index([categoryId])
   @@index([subcategoryId])
   @@index([language])
+  @@index([isLead])
 }
 
 model Category {

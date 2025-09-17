@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
 import { Prisma } from "@prisma/client";
 
 // Standard API error response interface
@@ -97,7 +97,7 @@ export function createErrorResponse(
     type = error.type;
   } else if (error instanceof ZodError) {
     statusCode = 400;
-    message = "Validation failed: " + error.errors.map(e => e.message).join(", ");
+    message = "Validation failed: " + error.issues.map(e => e.message).join(", ");
     type = ErrorType.VALIDATION_ERROR;
   } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const { code, message: prismaMessage } = error;
@@ -200,7 +200,7 @@ async function logError(
 }
 
 // Async error handler wrapper for API routes
-export function withErrorHandler<T extends any[], R>(
+export function withErrorHandler<T extends unknown[], R>(
   handler: (...args: T) => Promise<R>
 ) {
   return async (...args: T): Promise<R | NextResponse<APIErrorResponse>> => {
@@ -231,7 +231,7 @@ export async function handleDatabaseOperation<T>(
 
 // Validation helper
 export function validateRequest<T>(
-  schema: any,
+  schema: z.ZodSchema<T>,
   data: unknown
 ): T {
   try {
@@ -239,7 +239,7 @@ export function validateRequest<T>(
   } catch (error) {
     if (error instanceof ZodError) {
       throw new ValidationError(
-        "Invalid request data: " + error.errors.map(e => e.message).join(", ")
+        "Invalid request data: " + error.issues.map(e => e.message).join(", ")
       );
     }
     throw error;

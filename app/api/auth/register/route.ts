@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { 
-  createErrorResponse, 
   withErrorHandler, 
   handleDatabaseOperation,
   ConflictError,
@@ -20,7 +19,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
   
   // Validate input
-  const validatedData = validateRequest(registerSchema, body);
+  const validatedData = validateRequest<z.infer<typeof registerSchema>>(registerSchema, body);
   const { name, email, password } = validatedData;
 
   // Check if user already exists
