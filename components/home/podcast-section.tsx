@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { PostWithAuthorAndCategorySelect } from '@/lib/types';
+import { generateExcerpt } from '@/lib/post-utils';
 import { YouTubeEmbed } from '@/components/posts/youtube-embed';
 
 interface CategoryWithPosts {
@@ -65,10 +66,7 @@ export function PodcastSection({ category }: PodcastSectionProps) {
 
               {/* Excerpt */}
               <p className="text-muted-foreground text-base sm:text-lg lg:text-xl leading-relaxed line-clamp-3 sm:line-clamp-4">
-                {podcastPost.content.length > 200 
-                  ? `${podcastPost.content.substring(0, 200)}...`
-                  : podcastPost.content
-                }
+                {generateExcerpt(podcastPost.content, 200)}
               </p>
 
               {/* Date */}

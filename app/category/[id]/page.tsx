@@ -30,8 +30,8 @@ async function getCategoryPosts(categoryId: string, categoryLanguage: string, su
     
     // Filter posts by category, language, and optionally subcategory
     const where = subcategoryId 
-      ? { categoryId, subcategoryId, language: categoryLanguage }
-      : { categoryId, language: categoryLanguage };
+      ? { categoryId, subcategoryId, language: categoryLanguage, status: 'published' }
+      : { categoryId, language: categoryLanguage, status: 'published' };
 
     const [posts, totalPosts] = await Promise.all([
       prisma.post.findMany({

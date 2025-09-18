@@ -10,6 +10,7 @@ import { CategorySelector } from '@/components/categories/category-selector';
 import { SubcategorySelector } from '@/components/categories/subcategory-selector';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { validatePostData } from '@/lib/post-utils';
 import { PostWithAuthorAndCategory, PostWithAuthorAndCategorySelect } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -288,14 +289,10 @@ export function PostForm({ post, onSuccess }: PostFormProps) {
             {/* Content */}
             <div className="space-y-2">
               <Label htmlFor="content">Content *</Label>
-              <textarea
-                id="content"
+              <RichTextEditor
                 value={formData.content}
-                onChange={(e) => handleInputChange('content', e.target.value)}
+                onChange={(content) => handleInputChange('content', content)}
                 placeholder="Write your post content here..."
-                required
-                rows={12}
-                className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-vertical bg-background text-foreground"
               />
               <FieldError error={fieldErrors.content} />
             </div>

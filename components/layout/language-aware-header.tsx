@@ -21,8 +21,11 @@ export function LanguageAwareHeader() {
   // Load language from URL or localStorage on mount and set current date
   useEffect(() => {
     const urlLanguage = searchParams.get('lang');
-    const savedLanguage = localStorage.getItem('litaria-language') || 'en';
-    const language = urlLanguage || savedLanguage;
+    const savedLanguage = localStorage.getItem('litaria-language');
+    
+    // Always default to English for new visitors
+    // Only use saved language if it exists AND no URL language is specified
+    const language = urlLanguage || (savedLanguage || 'en');
     setCurrentLanguage(language);
 
     // Set current date based on language
@@ -40,7 +43,7 @@ export function LanguageAwareHeader() {
       // For now, using English format - can be enhanced with Bengali calendar later
       dateString = now.toLocaleDateString('bn-BD', options);
     } else {
-      // English date format
+      // English date format - default for new visitors
       const options: Intl.DateTimeFormatOptions = { 
         weekday: 'long', 
         year: 'numeric', 
@@ -51,6 +54,11 @@ export function LanguageAwareHeader() {
     }
     
     setCurrentDate(dateString);
+    
+    // Only save to localStorage if user explicitly chose a language via URL
+    if (urlLanguage) {
+      localStorage.setItem('litaria-language', urlLanguage);
+    }
   }, [searchParams]);
 
   const toggleMobileMenu = () => {

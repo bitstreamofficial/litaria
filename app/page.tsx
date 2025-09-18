@@ -77,7 +77,8 @@ async function getPostsByCategories(language?: string, postsPerCategory: number 
           const allPosts = await prisma.post.findMany({
             where: {
               categoryId: { in: categoryGroup.map(cat => cat.id) },
-              isLead: false
+              isLead: false,
+              status: 'published' // Only show published posts
             },
             include: {
               author: {
@@ -170,7 +171,8 @@ async function getPostsByCategories(language?: string, postsPerCategory: number 
         const posts = await prisma.post.findMany({
           where: {
             categoryId: category.id,
-            isLead: false
+            isLead: false,
+            status: 'published' // Only show published posts
           },
           include: {
             author: {
@@ -218,7 +220,11 @@ async function getLeadPost(language?: string) {
   try {
     // Default to English for lead post when no language is specified
     const leadPostLanguage = language || 'en';
-    const where = { isLead: true, language: leadPostLanguage };
+    const where = { 
+      isLead: true, 
+      language: leadPostLanguage,
+      status: 'published' // Only show published lead posts
+    };
 
     const leadPost = await prisma.post.findFirst({
       where,

@@ -22,8 +22,9 @@ async function searchPosts(query: string, page: number = 1, limit: number = 10) 
 
     const skip = (page - 1) * limit;
     
-    // Search in title and content
+    // Search in title and content (only published posts)
     const searchCondition = {
+      status: 'published',
       OR: [
         {
           title: {

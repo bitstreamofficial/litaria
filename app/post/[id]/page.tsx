@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/db';
-import { formatPostDate, calculateReadingTime, getRelatedPosts } from '@/lib/post-utils';
+import { formatPostDate, calculateReadingTime, generateExcerpt } from '@/lib/post-utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PostCard } from '@/components/posts';
@@ -96,18 +96,6 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Back Navigation */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-      </div>
-
       {/* Post Content */}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="bg-white">
@@ -171,9 +159,10 @@ export default async function PostPage({ params }: PostPageProps) {
 
             {/* Post Content */}
             <div className="prose prose-lg max-w-none">
-              <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                {post.content}
-              </div>
+              <div 
+                className="text-gray-800 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
             </div>
           </CardContent>
         </Card>
@@ -218,10 +207,10 @@ export async function generateMetadata({ params }: PostPageProps) {
 
   return {
     title: `${post.title} - Litaria`,
-    description: post.content.substring(0, 160) + '...',
+    description: generateExcerpt(post.content, 160),
     openGraph: {
       title: post.title,
-      description: post.content.substring(0, 160) + '...',
+      description: generateExcerpt(post.content, 160),
       images: post.imageUrl ? [post.imageUrl] : [],
     },
   };

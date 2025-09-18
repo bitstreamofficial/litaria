@@ -37,7 +37,7 @@ export function PostsManagement({ userId }: PostsManagementProps) {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/posts?authorId=${userId}`);
+      const response = await fetch(`/api/posts?authorId=${userId}&limit=1000`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch posts');

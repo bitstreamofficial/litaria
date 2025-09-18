@@ -32,8 +32,8 @@ export function DashboardSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 bg-white shadow-sm border-r fixed left-0 top-[73px] h-[calc(100vh-73px)] flex flex-col shrink-0 z-10">
-      <nav className="pt-12 px-4 pb-4 flex-1 overflow-y-auto">
+    <aside className="w-56 bg-white shadow-sm border-r fixed left-0 top-0 h-screen flex flex-col shrink-0 z-10">
+      <nav className="pt-8 px-4 pb-4 flex-1 overflow-y-auto">
         <ul className="space-y-2">
           {sidebarItems.map((item) => {
             const isActive = pathname === item.href;
